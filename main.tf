@@ -1,85 +1,71 @@
-terraform {
-  required_providers {
-    azurerm = {
-      source = "hashicorp/azurerm"
-    }
-  }
+module "resource_group" {
+  source = "./modules/resource_group"
+
+  for_each = local.environments
+
+  name     = each.value.resource_group_name
+  location = each.value.location
 }
 
-provider "azurerm" {
-  features {}
+module "networking" {
+  source = "./modules/networking"
+
+  for_each = local.environments
+
+  resource_group_name = module.resource_group[each.key].name
+  location            = module.resource_group[each.key].location
+
+  vnet_name          = each.value.vnet_name
+  vnet_address_space = each.value.vnet_address_space
+
+  public_subnet_name     = each.value.public_subnet_name
+  public_subnet_prefixes = each.value.public_subnet_prefixes
+
+  private_subnet_name     = each.value.private_subnet_name
+  private_subnet_prefixes = each.value.private_subnet_prefixes
 }
 
-resource "azurerm_resource_group" "lab" {
-  name     = "rg-databricks-lab"
-  location = "North Europe"
-}
+module "storage" {
+  source = "./modules/storage"
 
-resource "azurerm_virtual_network" "databricks" {
-  name                = "vnet-databricks-lab"
-  location            = azurerm_resource_group.lab.location
-  resource_group_name = azurerm_resource_group.lab.name
+  for_each = local.environments
 
-  address_space = ["10.0.0.0/16"]
-}
+  resource_group_name = module.resource_group[each.key].name
+  location            = module.resource_group[each.key].location
 
-resource "azurerm_subnet" "databricks_public" {
-  name                 = "snet-databricks-public"
-  resource_group_name  = azurerm_resource_group.lab.name
-  virtual_network_name = azurerm_virtual_network.databricks.name
-  address_prefixes     = ["10.0.1.0/24"]
-}
+  storage_account_name = "${each.key}dbx${random_string.storage_suffix[each.key].result}"
 
-resource "azurerm_subnet" "databricks_private" {
-  name                 = "snet-databricks-private"
-  resource_group_name  = azurerm_resource_group.lab.name
-  virtual_network_name = azurerm_virtual_network.databricks.name
-  address_prefixes     = ["10.0.2.0/24"]
-}
-
-resource "azurerm_databricks_workspace" "lab" {
-  name                = "dbw-databricks-lab"
-  resource_group_name = azurerm_resource_group.lab.name
-  location            = azurerm_resource_group.lab.location
-  sku                 = "premium"
-}
-
-resource "azurerm_storage_account" "datalake" {
-  name                     = "n5go3xx3fvzohb1b51cf"
-  resource_group_name      = azurerm_resource_group.lab.name
-  location                 = azurerm_resource_group.lab.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-
-  is_hns_enabled = true
-}
-
-locals {
   containers = toset([
-    "unity-catalog",
-    "data"
+    "data",
+    "unity-catalog"
   ])
 }
 
-resource "azurerm_storage_container" "datalake" {
-  for_each = local.containers
+module "databricks_ws" {
+  source = "./modules/databricks_ws"
 
-  name               = each.value
-  storage_account_id = azurerm_storage_account.datalake.id
+  for_each = local.environments
+
+  workspace_name      = "${each.key}-databricks-ws"
+  resource_group_name = module.resource_group[each.key].name
+  location            = module.resource_group[each.key].location
+
+  vnet_id             = module.networking[each.key].vnet_id
+  public_subnet_name  = module.networking[each.key].public_subnet_name
+  private_subnet_name = module.networking[each.key].private_subnet_name
+
+  public_subnet_nsg_association_id  = module.networking[each.key].public_subnet_nsg_association_id
+  private_subnet_nsg_association_id = module.networking[each.key].private_subnet_nsg_association_id
 }
 
-resource "azurerm_databricks_access_connector" "unity_catalog" {
-  name                = "ac-databricks-lab"
-  resource_group_name = azurerm_resource_group.lab.name
-  location            = azurerm_resource_group.lab.location
+module "access_connector" {
+  source = "./modules/access_connector"
 
-  identity {
-    type = "SystemAssigned"
-  }
-}
+  for_each = local.environments
 
-resource "azurerm_role_assignment" "datalake" {
-  scope                = azurerm_storage_account.datalake.id
-  role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azurerm_databricks_access_connector.unity_catalog.identity[0].principal_id
+  name                = "${each.key}-databricks-access-connector"
+  resource_group_name = module.resource_group[each.key].name
+  location            = module.resource_group[each.key].location
+
+  storage_account_id = module.storage[each.key].storage_account_id
 }
