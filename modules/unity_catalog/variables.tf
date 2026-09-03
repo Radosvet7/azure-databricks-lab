@@ -21,3 +21,15 @@ variable "unity_catalog_container_name" {
 variable "external_location_name" {
   type = string
 }
+
+variable "managed_external_location_name" {
+  type = string
+}
+
+variable "catalog_name" {
+  type = string
+}
+
+variable "schemas" {
+  type = set(string)
+}
