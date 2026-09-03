@@ -69,3 +69,33 @@ module "access_connector" {
 
   storage_account_id = module.storage[each.key].storage_account_id
 }
+
+module "unity_catalog_dev" {
+  source = "./modules/unity_catalog"
+
+  providers = {
+    databricks = databricks.dev
+  }
+
+  storage_credential_name      = "dev-storage-credential"
+  external_location_name       = "dev-data-external-location"
+  access_connector_id          = module.access_connector["dev"].id
+  storage_account_name         = module.storage["dev"].storage_account_name
+  data_container_name          = "data"
+  unity_catalog_container_name = "unity-catalog"
+}
+
+module "unity_catalog_prod" {
+  source = "./modules/unity_catalog"
+
+  providers = {
+    databricks = databricks.prod
+  }
+
+  storage_credential_name      = "prod-storage-credential"
+  external_location_name       = "prod-data-external-location"
+  access_connector_id          = module.access_connector["prod"].id
+  storage_account_name         = module.storage["prod"].storage_account_name
+  data_container_name          = "data"
+  unity_catalog_container_name = "unity-catalog"
+}

@@ -17,3 +17,7 @@ variable "data_container_name" {
 variable "unity_catalog_container_name" {
   type = string
 }
+
+variable "external_location_name" {
+  type = string
+}
