@@ -33,3 +33,7 @@ variable "catalog_name" {
 variable "schemas" {
   type = set(string)
 }
+
+variable "workspace_id" {
+  type = number
+}

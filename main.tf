@@ -81,6 +81,7 @@ module "unity_catalog_dev" {
   external_location_name         = "dev-data-external-location"
   managed_external_location_name = "dev-uc-managed-location"
   catalog_name                   = "dev_catalog"
+  workspace_id                   = module.databricks_ws["dev"].workspace_id
   access_connector_id            = module.access_connector["dev"].id
   storage_account_name           = module.storage["dev"].storage_account_name
   data_container_name            = "data"
@@ -99,6 +100,7 @@ module "unity_catalog_prod" {
   external_location_name         = "prod-data-external-location"
   managed_external_location_name = "prod-uc-managed-location"
   catalog_name                   = "prod_catalog"
+  workspace_id                   = module.databricks_ws["prod"].workspace_id
   access_connector_id            = module.access_connector["prod"].id
   storage_account_name           = module.storage["prod"].storage_account_name
   data_container_name            = "data"
