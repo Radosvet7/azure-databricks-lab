@@ -16,3 +16,11 @@ output "container_names" {
     key => container.name
   }
 }
+
+output "data_container_url" {
+  value = "abfss://${azurerm_storage_container.this["data"].name}@${azurerm_storage_account.this.name}.dfs.core.windows.net/"
+}
+
+output "unity_catalog_container_url" {
+  value = "abfss://${azurerm_storage_container.this["unity-catalog"].name}@${azurerm_storage_account.this.name}.dfs.core.windows.net/"
+}

@@ -83,10 +83,10 @@ module "unity_catalog_dev" {
   catalog_name                   = "dev_catalog"
   workspace_id                   = module.databricks_ws["dev"].workspace_id
   access_connector_id            = module.access_connector["dev"].id
-  storage_account_name           = module.storage["dev"].storage_account_name
-  data_container_name            = "data"
-  unity_catalog_container_name   = "unity-catalog"
-  schemas                        = toset(["bronze", "silver", "gold"])
+  data_container_url             = module.storage["dev"].data_container_url
+  unity_catalog_container_url    = module.storage["dev"].unity_catalog_container_url
+
+  schemas = toset(["bronze", "silver", "gold"])
 }
 
 module "unity_catalog_prod" {
@@ -102,8 +102,7 @@ module "unity_catalog_prod" {
   catalog_name                   = "prod_catalog"
   workspace_id                   = module.databricks_ws["prod"].workspace_id
   access_connector_id            = module.access_connector["prod"].id
-  storage_account_name           = module.storage["prod"].storage_account_name
-  data_container_name            = "data"
-  unity_catalog_container_name   = "unity-catalog"
+  data_container_url             = module.storage["prod"].data_container_url
+  unity_catalog_container_url    = module.storage["prod"].unity_catalog_container_url
   schemas                        = toset(["bronze", "silver", "gold"])
 }

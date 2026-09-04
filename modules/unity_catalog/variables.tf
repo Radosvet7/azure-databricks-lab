@@ -6,18 +6,6 @@ variable "access_connector_id" {
   type = string
 }
 
-variable "storage_account_name" {
-  type = string
-}
-
-variable "data_container_name" {
-  type = string
-}
-
-variable "unity_catalog_container_name" {
-  type = string
-}
-
 variable "external_location_name" {
   type = string
 }
@@ -36,4 +24,12 @@ variable "schemas" {
 
 variable "workspace_id" {
   type = number
+}
+
+variable "data_container_url" {
+  type = string
+}
+
+variable "unity_catalog_container_url" {
+  type = string
 }
