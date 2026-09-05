@@ -24,3 +24,7 @@ output "data_container_url" {
 output "unity_catalog_container_url" {
   value = "abfss://${azurerm_storage_container.this["unity-catalog"].name}@${azurerm_storage_account.this.name}.dfs.core.windows.net/"
 }
+
+output "principal_id" {
+  value = azurerm_storage_account.this.identity[0].principal_id
+}

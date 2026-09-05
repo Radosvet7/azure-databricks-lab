@@ -7,6 +7,10 @@ resource "azurerm_storage_account" "this" {
 
   is_hns_enabled                = true
   public_network_access_enabled = false
+
+  identity {
+    type = "SystemAssigned"
+  }
 }
 
 resource "azurerm_storage_container" "this" {

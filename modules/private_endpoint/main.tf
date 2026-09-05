@@ -6,9 +6,9 @@ resource "azurerm_private_endpoint" "this" {
 
   private_service_connection {
     name                           = "${var.private_endpoint_name}-connection"
-    private_connection_resource_id = var.storage_account_id
+    private_connection_resource_id = var.target_resource_id
     is_manual_connection           = false
-    subresource_names              = ["dfs"]
+    subresource_names              = [var.subresource_name]
   }
 
   private_dns_zone_group {
@@ -18,7 +18,7 @@ resource "azurerm_private_endpoint" "this" {
 }
 
 resource "azurerm_private_dns_zone" "this" {
-  name                = "privatelink.dfs.core.windows.net"
+  name                = var.private_dns_zone_name
   resource_group_name = var.resource_group_name
 }
 

@@ -13,3 +13,7 @@ variable "location" {
 variable "tenant_id" {
   type = string
 }
+
+variable "storage_principal_id" {
+  type = string
+}

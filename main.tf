@@ -130,9 +130,29 @@ module "private_endpoint" {
   resource_group_name   = module.resource_group[each.key].name
   location              = module.resource_group[each.key].location
 
-  vnet_id            = module.networking[each.key].vnet_id
-  subnet_id          = module.networking[each.key].private_endpoint_subnet_id
-  storage_account_id = module.storage[each.key].storage_account_id
+  vnet_id   = module.networking[each.key].vnet_id
+  subnet_id = module.networking[each.key].private_endpoint_subnet_id
+
+  target_resource_id    = module.storage[each.key].storage_account_id
+  subresource_name      = "dfs"
+  private_dns_zone_name = "privatelink.dfs.core.windows.net"
+}
+
+module "private_endpoint-kv" {
+  source = "./modules/private_endpoint"
+
+  for_each = local.environments
+
+  private_endpoint_name = "pe-kv-${each.key}"
+  resource_group_name   = module.resource_group[each.key].name
+  location              = module.resource_group[each.key].location
+
+  vnet_id   = module.networking[each.key].vnet_id
+  subnet_id = module.networking[each.key].private_endpoint_subnet_id
+
+  target_resource_id    = module.key_vault[each.key].key_vault_id
+  subresource_name      = "vault"
+  private_dns_zone_name = "privatelink.vaultcore.azure.net"
 }
 
 module "ncc" {
@@ -155,9 +175,10 @@ module "key_vault" {
 
   for_each = local.environments
 
-  name                = "kv-databricks-${each.key}"
-  resource_group_name = module.resource_group[each.key].name
-  location            = module.resource_group[each.key].location
-  tenant_id           = var.azure_tenant_id
+  name                 = "kv-dbx-${each.key}-r7lab"
+  resource_group_name  = module.resource_group[each.key].name
+  location             = module.resource_group[each.key].location
+  tenant_id            = var.azure_tenant_id
+  storage_principal_id = module.storage[each.key].principal_id
 
 }

@@ -14,10 +14,18 @@ variable "subnet_id" {
   type = string
 }
 
-variable "storage_account_id" {
+variable "vnet_id" {
   type = string
 }
 
-variable "vnet_id" {
+variable "target_resource_id" {
+  type = string
+}
+
+variable "subresource_name" {
+  type = string
+}
+
+variable "private_dns_zone_name" {
   type = string
 }
