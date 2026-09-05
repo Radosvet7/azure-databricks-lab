@@ -25,3 +25,7 @@ output "public_subnet_nsg_association_id" {
 output "private_subnet_nsg_association_id" {
   value = azurerm_subnet_network_security_group_association.databricks_private.id
 }
+
+output "private_endpoint_subnet_id" {
+  value = azurerm_subnet.private_endpoints.id
+}

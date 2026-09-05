@@ -23,6 +23,9 @@ module "networking" {
 
   private_subnet_name     = each.value.private_subnet_name
   private_subnet_prefixes = each.value.private_subnet_prefixes
+
+  private_endpoint_subnet_name     = each.value.private_endpoint_subnet_name
+  private_endpoint_subnet_prefixes = each.value.private_endpoint_subnet_prefixes
 }
 
 module "storage" {
@@ -74,7 +77,8 @@ module "unity_catalog_dev" {
   source = "./modules/unity_catalog"
 
   providers = {
-    databricks = databricks.dev
+    databricks         = databricks.dev
+    databricks.account = databricks.account
   }
 
   storage_credential_name        = "dev-storage-credential"
@@ -85,15 +89,20 @@ module "unity_catalog_dev" {
   access_connector_id            = module.access_connector["dev"].id
   data_container_url             = module.storage["dev"].data_container_url
   unity_catalog_container_url    = module.storage["dev"].unity_catalog_container_url
+  metastore_id                   = data.databricks_metastores.this.ids["metastore_azure_northeurope"]
+  schemas                        = toset(["bronze", "silver", "gold"])
 
-  schemas = toset(["bronze", "silver", "gold"])
+  depends_on = [
+  module.private_endpoint["dev"]
+  ]
 }
 
 module "unity_catalog_prod" {
   source = "./modules/unity_catalog"
 
   providers = {
-    databricks = databricks.prod
+    databricks         = databricks.prod
+    databricks.account = databricks.account
   }
 
   storage_credential_name        = "prod-storage-credential"
@@ -104,5 +113,25 @@ module "unity_catalog_prod" {
   access_connector_id            = module.access_connector["prod"].id
   data_container_url             = module.storage["prod"].data_container_url
   unity_catalog_container_url    = module.storage["prod"].unity_catalog_container_url
+  metastore_id                   = data.databricks_metastores.this.ids["metastore_azure_northeurope"]
   schemas                        = toset(["bronze", "silver", "gold"])
+
+  depends_on = [
+  module.private_endpoint["prod"]
+  ]
 }
+
+module "private_endpoint" {
+  source = "./modules/private_endpoint"
+
+  for_each = local.environments
+
+  private_endpoint_name = "pe-adls-${each.key}"
+  resource_group_name   = module.resource_group[each.key].name
+  location              = module.resource_group[each.key].location
+
+  vnet_id            = module.networking[each.key].vnet_id
+  subnet_id          = module.networking[each.key].private_endpoint_subnet_id
+  storage_account_id = module.storage[each.key].storage_account_id
+}
+

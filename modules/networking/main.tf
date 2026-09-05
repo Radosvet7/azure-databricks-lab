@@ -48,6 +48,14 @@ resource "azurerm_subnet" "databricks_private" {
   }
 }
 
+resource "azurerm_subnet" "private_endpoints" {
+  name                 = var.private_endpoint_subnet_name
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.databricks.name
+  address_prefixes     = var.private_endpoint_subnet_prefixes
+}
+
+
 resource "azurerm_network_security_group" "databricks_public" {
   name                = "nsg-${var.public_subnet_name}"
   location            = var.location

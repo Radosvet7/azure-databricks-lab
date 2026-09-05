@@ -12,6 +12,9 @@ locals {
 
       private_subnet_name     = "snet-databricks-private-dev"
       private_subnet_prefixes = ["10.0.2.0/24"]
+
+      private_endpoint_subnet_name     = "snet-private-endpoints-dev"
+      private_endpoint_subnet_prefixes = ["10.0.3.0/24"]
     }
 
     prod = {
@@ -26,6 +29,9 @@ locals {
 
       private_subnet_name     = "snet-databricks-private-prod"
       private_subnet_prefixes = ["10.1.2.0/24"]
+
+      private_endpoint_subnet_name     = "snet-private-endpoints-prod"
+      private_endpoint_subnet_prefixes = ["10.1.3.0/24"]
     }
   }
 }

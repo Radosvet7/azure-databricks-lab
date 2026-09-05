@@ -33,3 +33,7 @@ variable "data_container_url" {
 variable "unity_catalog_container_url" {
   type = string
 }
+
+variable "metastore_id" {
+  type = string
+}
