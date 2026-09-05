@@ -93,7 +93,7 @@ module "unity_catalog_dev" {
   schemas                        = toset(["bronze", "silver", "gold"])
 
   depends_on = [
-  module.private_endpoint["dev"]
+    module.private_endpoint["dev"]
   ]
 }
 
@@ -117,7 +117,7 @@ module "unity_catalog_prod" {
   schemas                        = toset(["bronze", "silver", "gold"])
 
   depends_on = [
-  module.private_endpoint["prod"]
+    module.private_endpoint["prod"]
   ]
 }
 
@@ -135,3 +135,29 @@ module "private_endpoint" {
   storage_account_id = module.storage[each.key].storage_account_id
 }
 
+module "ncc" {
+  source = "./modules/ncc"
+
+  for_each = local.environments
+
+  providers = {
+    databricks.account = databricks.account
+  }
+
+  name               = "${each.key}-ncc"
+  region             = "northeurope"
+  workspace_id       = module.databricks_ws[each.key].workspace_id
+  storage_account_id = module.storage[each.key].storage_account_id
+}
+
+module "key_vault" {
+  source = "./modules/key_vault"
+
+  for_each = local.environments
+
+  name                = "kv-databricks-${each.key}"
+  resource_group_name = module.resource_group[each.key].name
+  location            = module.resource_group[each.key].location
+  tenant_id           = var.azure_tenant_id
+
+}
